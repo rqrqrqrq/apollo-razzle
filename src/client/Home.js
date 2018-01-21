@@ -1,5 +1,23 @@
 import React from 'react';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 
-const Home = () => <h1>HOMe</h1>;
+const Home = ({ data }) => {
+  if (data.loading) {
+    return 'Loading';
+  }
 
-export default Home;
+  if (data.error) {
+    return 'errr';
+  }
+
+  return <h1>{data.hello}</h1>;
+};
+
+const helloQuery = gql`
+  query hello {
+    hello
+  }
+`;
+
+export default graphql(helloQuery)(Home);

@@ -1,4 +1,7 @@
 import express from 'express';
+import bodyParser from 'body-parser';
+import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
+import schema from './server/schema';
 import render from './server/render';
 
 const app = express();
@@ -6,6 +9,8 @@ const app = express();
 app
   .disable('x-powered-by')
   .use(express.static(process.env.RAZZLE_PUBLIC_DIR))
+  .post('/graphql', bodyParser.json(), graphqlExpress({ schema }))
+  .get('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
   .get('/*', render);
 
 export default app;

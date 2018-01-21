@@ -1,13 +1,26 @@
 import React from 'react';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 
-const items = [
-  { id: 1, name: 'test' },
-  { id: 2, name: 'another test' },
-  { id: 3, name: 'yoba' },
-];
+const Store = ({ data }) => {
+  if (data.loading) {
+    return 'Loading';
+  }
 
-const Store = () => (
-  <ul>{items.map(item => <li key={item.id}>{item.name}</li>)}</ul>
-);
+  if (data.error) {
+    return 'errr';
+  }
 
-export default Store;
+  return <ul>{data.items.map(item => <li key={item.id}>{item.name}</li>)}</ul>;
+};
+
+const itemsQuery = gql`
+  query items {
+    items {
+      id
+      name
+    }
+  }
+`;
+
+export default graphql(itemsQuery)(Store);

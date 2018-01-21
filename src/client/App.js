@@ -32,7 +32,7 @@ const App = () => (
           <Link to="/store">Store</Link>
         </li>
         <li>
-          <Link to="/about">Hello</Link>
+          <Link to="/about">About</Link>
         </li>
         <li>
           <Link to="/redirect">redirect test</Link>
