@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import App from './client/App';
 
-window.main = () => {
+window.main = () =>
   Loadable.preloadReady().then(() => {
     hydrate(
       <BrowserRouter>
@@ -13,8 +13,9 @@ window.main = () => {
       document.getElementById('root'),
     );
   });
-};
 
 if (module.hot) {
-  module.hot.accept();
+  module.hot.accept('./client/App', () => {
+    window.main();
+  });
 }
