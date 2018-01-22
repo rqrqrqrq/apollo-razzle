@@ -1,8 +1,15 @@
 const webpack = require('webpack');
 const { ReactLoadablePlugin } = require('react-loadable/webpack');
+const BundleAnalyzer = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
   modify: (config, { target }) => {
+    const conditionalPlugins = [];
+
+    if (process.env.BUNDLE_ANALYZER) {
+      conditionalPlugins.push(new BundleAnalyzer());
+    }
+
     if (target === 'web') {
       return {
         ...config,
@@ -24,6 +31,7 @@ module.exports = {
               return module.context && module.context.includes('node_modules');
             },
           }),
+          ...conditionalPlugins,
         ],
       };
     }

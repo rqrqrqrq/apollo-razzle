@@ -28,6 +28,8 @@
     "react-router-dom": "^4.2.2"
   },
   "devDependencies": {
-    "prettier": "^1.10.2"
+    "babel-plugin-graphql-tag": "^1.3.0",
+    "prettier": "^1.10.2",
+    "webpack-bundle-analyzer": "^2.9.2"
   }
 }

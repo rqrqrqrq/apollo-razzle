@@ -1,4 +1,4 @@
 {
   "presets": ["razzle/babel"],
-  "plugins": ["react-loadable/babel"]
+  "plugins": ["react-loadable/babel", "graphql-tag"]
 }
