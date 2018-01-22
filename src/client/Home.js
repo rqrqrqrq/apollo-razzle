@@ -8,7 +8,7 @@ const Home = ({ data }) => {
   }
 
   if (data.error) {
-    return 'errr';
+    return 'Error';
   }
 
   return <h1>{data.hello}</h1>;

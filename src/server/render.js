@@ -65,6 +65,11 @@ const render = (req, res) => {
           <div id="root">${markup}</div>
           ${
             process.env.NODE_ENV === 'production'
+              ? `<script src="${assets.vendor.js}"></script>`
+              : `<script src="${assets.vendor.js}" crossorigin></script>`
+          }
+          ${
+            process.env.NODE_ENV === 'production'
               ? `<script src="${assets.client.js}"></script>`
               : `<script src="${assets.client.js}" crossorigin></script>`
           }
