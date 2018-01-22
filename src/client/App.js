@@ -1,20 +1,24 @@
 import React from 'react';
 import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
 import Loadable from 'react-loadable';
+import Loading from './Loading';
 
 const Home = Loadable({
   loader: () => import('./Home'),
-  loading: () => null,
+  loading: Loading,
+  timeout: 10000,
 });
 
 const Store = Loadable({
   loader: () => import('./Store'),
-  loading: () => null,
+  loading: Loading,
+  timeout: 10000,
 });
 
 const About = Loadable({
   loader: () => import('./About'),
-  loading: () => null,
+  loading: Loading,
+  timeout: 10000,
 });
 
 const Link = props => <NavLink activeStyle={{ color: 'red' }} {...props} />;
