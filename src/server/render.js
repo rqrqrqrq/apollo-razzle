@@ -45,7 +45,8 @@ const render = (req, res) => {
       const initialState = client.extract();
       const stateString = JSON.stringify(initialState)
         .replace(/</g, '\\u003c')
-        .replace(/"/g, '\\"');
+        .replace(/"/g, '\\u0022')
+        .replace(/'/g, '\\u0027');
 
       res.status(200).send(`
       <!DOCTYPE html>

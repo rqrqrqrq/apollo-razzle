@@ -1,9 +1,9 @@
 import { makeExecutableSchema } from 'graphql-tools';
 
 const items = [
-  { id: 1, name: 'test' },
-  { id: 2, name: 'another test' },
-  { id: 3, name: 'yoba' },
+  { id: 1, name: 'te`st' },
+  { id: 2, name: 'anot"her test' },
+  { id: 3, name: "yob'a" },
 ];
 
 const typeDefs = `
