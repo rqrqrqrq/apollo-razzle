@@ -1,8 +1,9 @@
 import React from 'react';
+import { renderToNodeStream } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom';
 import { Capture } from 'react-loadable';
 import { getBundles } from 'react-loadable/webpack';
-import { renderToStringWithData, ApolloProvider } from 'react-apollo';
+import { getDataFromTree, ApolloProvider } from 'react-apollo';
 import { ApolloClient } from 'apollo-client';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
@@ -21,26 +22,72 @@ const render = (req, res) => {
 
   const context = {};
 
-  // FIXME: modules are duplicated, looks like an error
-  // propably should avoid `renderToStringWithData` and
-  // use low-level apollo api
-  const modules = new Set();
-
-  renderToStringWithData(
-    <Capture report={moduleName => modules.add(moduleName)}>
-      <ApolloProvider client={client}>
-        <StaticRouter context={context} location={req.url}>
-          <App />
-        </StaticRouter>
-      </ApolloProvider>
-    </Capture>,
-  ).then(markup => {
+  getDataFromTree(
+    <ApolloProvider client={client}>
+      {/* styled */}
+      <StaticRouter context={context} location={req.url}>
+        <App />
+      </StaticRouter>
+      {/* /styled */}
+    </ApolloProvider>,
+  ).then(() => {
     if (context.url) {
       res.redirect(context.url);
-    } else {
-      // FIXME: spreading to transform `Set` to `Array`
-      const bundles = getBundles(stats, [...modules]);
+      res.end();
+      return;
+    }
+    res.write(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset='utf-8' />
+<title>Welcome to Razzle</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">${
+      assets.client.css
+        ? `<link rel="stylesheet" href="${assets.client.css}">`
+        : ''
+    }
+</head>
+<body>
+<div id="root">`);
+
+    const modules = [];
+
+    const stream = renderToNodeStream(
+      <Capture report={moduleName => modules.push(moduleName)}>
+        <ApolloProvider client={client}>
+          <StaticRouter context={context} location={req.url}>
+            <App />
+          </StaticRouter>
+        </ApolloProvider>
+      </Capture>,
+    );
+
+    stream.pipe(res, { end: false });
+    stream.on('end', () => {
+      const bundles = getBundles(stats, modules);
       const chunks = bundles.filter(bundle => bundle.file.endsWith('.js'));
+
+      res.write(
+        `</div>${
+          process.env.NODE_ENV === 'production'
+            ? `<script src="${assets.vendor.js}"></script>`
+            : `<script src="${assets.vendor.js}" crossorigin></script>`
+        }${
+          process.env.NODE_ENV === 'production'
+            ? `<script src="${assets.client.js}"></script>`
+            : `<script src="${assets.client.js}" crossorigin></script>`
+        }${chunks
+          .map(
+            chunk =>
+              process.env.NODE_ENV === 'production'
+                ? `<script src="/${chunk.file}"></script>`
+                : `<script src="http://${process.env.HOST}:${process.env.PORT +
+                    1}/${chunk.file}"></script>`,
+          )
+          .join('')}`,
+      );
 
       const initialState = client.extract();
       const stateString = JSON.stringify(initialState)
@@ -48,49 +95,13 @@ const render = (req, res) => {
         .replace(/"/g, '\\u0022')
         .replace(/'/g, '\\u0027');
 
-      res.status(200).send(`
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset='utf-8' />
-          <title>Welcome to Razzle</title>
-          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          ${
-            assets.client.css
-              ? `<link rel="stylesheet" href="${assets.client.css}">`
-              : ''
-          }
-        </head>
-        <body>
-          <div id="root">${markup}</div>
-          ${
-            process.env.NODE_ENV === 'production'
-              ? `<script src="${assets.vendor.js}"></script>`
-              : `<script src="${assets.vendor.js}" crossorigin></script>`
-          }
-          ${
-            process.env.NODE_ENV === 'production'
-              ? `<script src="${assets.client.js}"></script>`
-              : `<script src="${assets.client.js}" crossorigin></script>`
-          }
-          ${chunks
-            .map(
-              chunk =>
-                process.env.NODE_ENV === 'production'
-                  ? `<script src="/${chunk.file}"></script>`
-                  : `<script src="http://${process.env.HOST}:${process.env
-                      .PORT + 1}/${chunk.file}"></script>`,
-            )
-            .join('\n')}
-          <script>
-            window.__APOLLO_STATE__ = '${stateString}';
-            window.main();
-          </script>
-        </body>
-      </html>
-    `);
-    }
+      res.end(`<script>
+window.__APOLLO_STATE__ = '${stateString}';
+window.main();
+</script>
+</body>
+</html>`);
+    });
   });
 };
 
