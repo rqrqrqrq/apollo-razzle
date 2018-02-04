@@ -9,6 +9,8 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { consolidateStreamedStyles } from 'styled-components';
 import App from './client/App';
 
+consolidateStreamedStyles();
+
 window.main = () =>
   Loadable.preloadReady().then(() => {
     const client = new ApolloClient({
@@ -16,8 +18,6 @@ window.main = () =>
       cache: new InMemoryCache().restore(JSON.parse(window.__APOLLO_STATE__)),
       ssrForceFetchDelay: 100,
     });
-
-    consolidateStreamedStyles();
 
     hydrate(
       <ApolloProvider client={client}>
