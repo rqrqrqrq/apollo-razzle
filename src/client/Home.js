@@ -1,6 +1,11 @@
 import React from 'react';
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
+import styled from 'styled-components';
+
+const Title = styled.h1`
+  color: hotpink;
+`;
 
 const Home = ({ data }) => {
   if (data.loading) {
@@ -11,7 +16,7 @@ const Home = ({ data }) => {
     return 'Error';
   }
 
-  return <h1>{data.hello}</h1>;
+  return <Title>{data.hello}</Title>;
 };
 
 const helloQuery = gql`

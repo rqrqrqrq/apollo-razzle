@@ -1,4 +1,13 @@
 {
   "presets": ["razzle/babel"],
-  "plugins": ["react-loadable/babel", "graphql-tag"]
+  "plugins": [
+    [
+      "babel-plugin-styled-components",
+      {
+        "ssr": true
+      }
+    ],
+    "react-loadable/babel",
+    "graphql-tag"
+  ]
 }
