@@ -2,6 +2,9 @@ import React from 'react';
 import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import Loading from './Loading';
+import { applyGlobalStyles } from './globalStyles';
+
+applyGlobalStyles();
 
 const Home = Loadable({
   loader: () => import('./Home'),
