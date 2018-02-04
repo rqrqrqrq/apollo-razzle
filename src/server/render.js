@@ -7,6 +7,7 @@ import { getDataFromTree, ApolloProvider } from 'react-apollo';
 import { ApolloClient } from 'apollo-client';
 import { SchemaLink } from 'apollo-link-schema';
 import { InMemoryCache } from 'apollo-cache-inmemory';
+import { ServerStyleSheet } from 'styled-components';
 import App from '../client/App';
 import stats from '../../build/react-loadable.json';
 import schema from './schema';
@@ -36,25 +37,28 @@ const render = (req, res) => {
       res.end();
       return;
     }
-    res.write(`
-<!DOCTYPE html>
+    res.write(
+      `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset='utf-8' />
 <title>Welcome to Razzle</title>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1">${
-      assets.client.css
-        ? `<link rel="stylesheet" href="${assets.client.css}">`
-        : ''
-    }
+        assets.client.css
+          ? `<link rel="stylesheet" href="${assets.client.css}">`
+          : ''
+      }
 </head>
 <body>
-<div id="root">`);
+<div id="root">`,
+    );
 
     const modules = [];
 
-    const stream = renderToNodeStream(
+    const sheet = new ServerStyleSheet();
+
+    const jsx = sheet.collectStyles(
       <Capture report={moduleName => modules.push(moduleName)}>
         <ApolloProvider client={client}>
           <StaticRouter context={context} location={req.url}>
@@ -63,6 +67,8 @@ const render = (req, res) => {
         </ApolloProvider>
       </Capture>,
     );
+
+    const stream = sheet.interleaveWithNodeStream(renderToNodeStream(jsx));
 
     stream.pipe(res, { end: false });
     stream.on('end', () => {

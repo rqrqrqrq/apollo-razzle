@@ -6,6 +6,7 @@ import { ApolloProvider } from 'react-apollo';
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 import { InMemoryCache } from 'apollo-cache-inmemory';
+import { consolidateStreamedStyles } from 'styled-components';
 import App from './client/App';
 
 window.main = () =>
@@ -15,6 +16,8 @@ window.main = () =>
       cache: new InMemoryCache().restore(JSON.parse(window.__APOLLO_STATE__)),
       ssrForceFetchDelay: 100,
     });
+
+    consolidateStreamedStyles();
 
     hydrate(
       <ApolloProvider client={client}>
