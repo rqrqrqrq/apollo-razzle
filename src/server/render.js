@@ -34,9 +34,12 @@ const render = (req, res) => {
   ).then(() => {
     if (context.url) {
       res.redirect(context.url);
+
       res.end();
+
       return;
     }
+
     res.write(
       `<!DOCTYPE html>
 <html lang="en">
@@ -71,6 +74,7 @@ const render = (req, res) => {
     const stream = sheet.interleaveWithNodeStream(renderToNodeStream(jsx));
 
     stream.pipe(res, { end: false });
+
     stream.on('end', () => {
       const bundles = getBundles(stats, modules);
       const chunks = bundles.filter(bundle => bundle.file.endsWith('.js'));
@@ -96,6 +100,7 @@ const render = (req, res) => {
       );
 
       const initialState = client.extract();
+
       const stateString = JSON.stringify(initialState)
         .replace(/</g, '\\u003c')
         .replace(/"/g, '\\u0022')
