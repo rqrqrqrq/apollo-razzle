@@ -1,14 +1,15 @@
-import express from 'express';
+import polka from 'express';
 import bodyParser from 'body-parser';
+import serveStatic from 'serve-static';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import schema from './server/schema';
 import render from './server/render';
 
-const app = express();
+const app = polka();
 
 app
   .disable('x-powered-by')
-  .use(express.static(process.env.RAZZLE_PUBLIC_DIR))
+  .use(serveStatic(process.env.RAZZLE_PUBLIC_DIR))
   .post('/graphql', bodyParser.json(), graphqlExpress({ schema }))
   .get('/graphiql', graphiqlExpress({ endpointURL: '/graphql' }))
   .get('/*', render);
