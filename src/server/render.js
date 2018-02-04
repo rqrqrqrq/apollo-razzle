@@ -22,15 +22,18 @@ const render = (req, res) => {
   });
 
   const context = {};
+  const modules = [];
 
   getDataFromTree(
-    <ApolloProvider client={client}>
-      {/* styled */}
-      <StaticRouter context={context} location={req.url}>
-        <App />
-      </StaticRouter>
-      {/* /styled */}
-    </ApolloProvider>,
+    <Capture report={moduleName => modules.push(moduleName)}>
+      <ApolloProvider client={client}>
+        {/* styled */}
+        <StaticRouter context={context} location={req.url}>
+          <App />
+        </StaticRouter>
+        {/* /styled */}
+      </ApolloProvider>
+    </Capture>,
   ).then(() => {
     if (context.url) {
       res.redirect(context.url);
@@ -40,35 +43,49 @@ const render = (req, res) => {
       return;
     }
 
-    res.write(
-      `<!DOCTYPE html>
+    const bundles = getBundles(stats, modules);
+
+    const chunks = bundles.filter(bundle => bundle.file.endsWith('.js'));
+
+    res.write(`<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset='utf-8' />
 <title>Welcome to Razzle</title>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1">${
-        assets.client.css
-          ? `<link rel="stylesheet" href="${assets.client.css}">`
-          : ''
-      }
+      assets.client.css
+        ? `<link rel="stylesheet" href="${assets.client.css}">`
+        : ''
+    }${
+      process.env.NODE_ENV === 'production'
+        ? `<link rel="preload" href="${assets.vendor.js}" as="script">`
+        : ''
+    }${
+      process.env.NODE_ENV === 'production'
+        ? `<link rel="preload" href="${assets.client.js}" as="script">`
+        : ''
+    }${chunks
+      .map(
+        chunk =>
+          process.env.NODE_ENV === 'production'
+            ? `<link rel="preload" href="${chunk.file}" as="script">`
+            : `<link rel="preload" href="http://${process.env.HOST}:${process
+                .env.PORT + 1}/${chunk.file}" as="script">`,
+      )
+      .join('')}
 </head>
 <body>
-<div id="root">`,
-    );
-
-    const modules = [];
+<div id="root">`);
 
     const sheet = new ServerStyleSheet();
 
     const jsx = sheet.collectStyles(
-      <Capture report={moduleName => modules.push(moduleName)}>
-        <ApolloProvider client={client}>
-          <StaticRouter context={context} location={req.url}>
-            <App />
-          </StaticRouter>
-        </ApolloProvider>
-      </Capture>,
+      <ApolloProvider client={client}>
+        <StaticRouter context={context} location={req.url}>
+          <App />
+        </StaticRouter>
+      </ApolloProvider>,
     );
 
     const stream = sheet.interleaveWithNodeStream(renderToNodeStream(jsx));
@@ -76,9 +93,6 @@ const render = (req, res) => {
     stream.pipe(res, { end: false });
 
     stream.on('end', () => {
-      const bundles = getBundles(stats, modules);
-      const chunks = bundles.filter(bundle => bundle.file.endsWith('.js'));
-
       res.write(
         `</div>${
           process.env.NODE_ENV === 'production'
