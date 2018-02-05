@@ -29,7 +29,7 @@ const Link = props => <NavLink activeStyle={{ color: 'red' }} {...props} />;
 
 const App = () => (
   <div>
-    <Header />
+    <Header>Title</Header>
     <nav>
       <ul>
         <li>

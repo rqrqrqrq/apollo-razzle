@@ -20,9 +20,14 @@ const typeDefs = `
     ${CommonInputFields}
   }
 
+  type Environment {
+    isServer: Boolean!
+  }
+
   type Query {
     hello: String!
     items: [Item]!
+    environment: Environment!
   }
 
   type Mutation {
@@ -34,6 +39,10 @@ const resolvers = {
   Query: {
     hello: () => 'HOME',
     items: () => items,
+    environment: () => ({
+      // FIXME: preventing warnings in server console;
+      isServer: true,
+    }),
   },
   Mutation: {
     createItem: (_, { input }) => {
