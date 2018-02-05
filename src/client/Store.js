@@ -15,7 +15,7 @@ const Store = ({ data }) => {
 };
 
 const itemsQuery = gql`
-  query items {
+  query GetItems {
     items {
       id
       name

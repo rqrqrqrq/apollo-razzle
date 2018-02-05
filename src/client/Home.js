@@ -20,7 +20,7 @@ const Home = ({ data }) => {
 };
 
 const helloQuery = gql`
-  query hello {
+  query Hello {
     hello
   }
 `;
