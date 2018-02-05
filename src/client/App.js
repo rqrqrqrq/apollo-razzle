@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavLink, Route, Switch, Redirect } from 'react-router-dom';
 import Loadable from 'react-loadable';
-import Loading from './Loading';
 import { applyGlobalStyles } from './globalStyles';
+import Loading from './Loading';
+import { Header } from './Header';
 
 applyGlobalStyles();
 
@@ -28,6 +29,7 @@ const Link = props => <NavLink activeStyle={{ color: 'red' }} {...props} />;
 
 const App = () => (
   <div>
+    <Header />
     <nav>
       <ul>
         <li>
