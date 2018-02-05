@@ -27,11 +27,9 @@ const render = (req, res) => {
   getDataFromTree(
     <Capture report={moduleName => modules.push(moduleName)}>
       <ApolloProvider client={client}>
-        {/* styled */}
         <StaticRouter context={context} location={req.url}>
           <App />
         </StaticRouter>
-        {/* /styled */}
       </ApolloProvider>
     </Capture>,
   ).then(() => {
