@@ -1,4 +1,4 @@
-import polka from 'express';
+import express from 'express';
 import bodyParser from 'body-parser';
 import serveStatic from 'serve-static';
 import compression from 'compression';
@@ -6,7 +6,7 @@ import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
 import schema from './server/schema';
 import render from './server/render';
 
-const app = polka();
+const app = express();
 
 app
   .use(compression())
